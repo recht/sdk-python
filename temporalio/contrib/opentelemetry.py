@@ -262,7 +262,11 @@ class _TracingActivityInboundInterceptor(temporalio.worker.ActivityInboundInterc
                 "temporalActivityID": info.activity_id,
             },
         ):
-            return await super().execute_activity(input)
+            token = opentelemetry.context.attach(ctx)
+            try:
+                return await super().execute_activity(input)
+            finally:
+                opentelemetry.context.detach(token)
 
 
 class _InputWithHeaders(Protocol):
